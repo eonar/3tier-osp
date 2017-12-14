@@ -1,0 +1,42 @@
+- hosts: jumpbox
+  gather_facts: false
+  vars:
+    frontendserver_name: frontend1
+    databaseserver_name: appdb1
+    flavor_name: m2.small
+    databaseserver_group: appdbs
+    database_group: databaseservers
+    deployment: dev
+  tasks:
+  - name: Create a appdb server instance
+    os_server:
+      cloud: ospcloud
+      name: "{{ databaseserver_name }}"
+      image: rhel-guest
+      meta: "group={{ databaseserver_group }},deployment_name={{ deployment }}"
+      flavor: "{{ flavor_name }}"
+      security_groups: ICMP_and_SSH
+      key_name: ansible_ssh
+      nics:
+      - net-name: int_network
+      userdata: |
+        #!/bin/bash
+        curl -o /tmp/openstack.pub http://www.opentlc.com/download/ansible_bootcamp/openstack_keys/openstack.pub
+        cat /tmp/openstack.pub >> /home/cloud-user/.ssh/authorized_keys
+        curl -o /tmp/internal.repo http://www.opentlc.com/download/ansible_bootcamp/repo/internal.repo
+        cp /tmp/internal.repo /etc/yum.repos.d/internal.repo
+    register: databaseserverip
+  - name: Add floating IP to databaseserver
+    os_floating_ip:
+      cloud: ospcloud
+      state: present
+      reuse: yes
+      server: "{{ databaseserver_name }}"
+      network: ext_network
+      wait: true
+      timeout: 180
+    register: databaseserverfloatingip
+  - name: Show databaseserver public IP
+    debug: var=databaseserverfloatingip.floating_ip.floating_ip_address
+  - name: Show databaseserver private IP
+    debug: var=databaseserverip.openstack.private_v4

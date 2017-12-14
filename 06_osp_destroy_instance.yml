@@ -1,0 +1,17 @@
+- hosts: jumpbox
+  gather_facts: false
+  vars:
+    webserver_name: web1
+    databaseserver_name: db1
+    flavor_name: m2.tiny
+    webserver_group: webservers
+    database_group: databaseservers
+    deployment: dev
+  tasks:
+  - name: Remove a server instance
+    os_server:
+      cloud: ospcloud
+      name: "{{ webserver_name }}"
+      state: absent
+
+

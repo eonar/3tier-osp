@@ -1,0 +1,14 @@
+- hosts: jumpbox
+  tasks:
+#  - name: Create m2.small flavor
+  - name: Create m2.tiny flavor
+    os_nova_flavor:
+     cloud: ospcloud
+     state: present
+#     name: m2.small
+     name: m2.tiny
+#     ram: 2048
+     ram: 512
+     vcpus: 1
+#     disk: 10
+     disk: 5

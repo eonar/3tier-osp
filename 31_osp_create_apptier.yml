@@ -1,0 +1,47 @@
+- hosts: jumpbox
+  gather_facts: false
+  vars:
+    #appserver_name: app1
+    flavor_name: m2.small
+    appserver_group: apps
+    deployment: dev
+  tasks:
+  - name: Create "{{ item }}" server instance
+    os_server:
+      cloud: ospcloud
+      name: "{{ item }}"
+      image: rhel-guest
+      meta: "group={{ appserver_group }},deployment_name={{ deployment }}"
+      flavor: "{{ flavor_name }}"
+      security_groups: ICMP_and_SSH
+      key_name: ansible_ssh
+      nics:
+      - net-name: int_network
+      userdata: |
+        #!/bin/bash
+        curl -o /tmp/openstack.pub http://www.opentlc.com/download/ansible_bootcamp/openstack_keys/openstack.pub
+        cat /tmp/openstack.pub >> /home/cloud-user/.ssh/authorized_keys
+        curl -o /tmp/internal.repo http://www.opentlc.com/download/ansible_bootcamp/repo/internal.repo
+        cp /tmp/internal.repo /etc/yum.repos.d/internal.repo
+    register: '{{ item }}serverip'
+    with_items:
+      - app1
+      - app2
+
+  - name: Add floating IP to "{{ item }}"
+    os_floating_ip:
+      cloud: ospcloud
+      state: present
+      reuse: yes
+      server: "{{ item }}"
+      network: ext_network
+      wait: true
+      timeout: 180
+    register: '{{ item }}floatingip'
+    with_items:
+      - app1
+      - app2
+  # - name: Show appserver1 public IP
+  #   debug: var=appserver1floatingip.floating_ip.floating_ip_address
+  # - name: Show appserver1 private IP
+  #   debug: var=appserver1ip.openstack.private_v4

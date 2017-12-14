@@ -1,0 +1,48 @@
+---
+  - name: install tomcat
+    package:
+      name: tomcat
+      state: latest
+  - name: enable tomcat at boot
+    service:
+      name: tomcat
+      enabled: yes
+
+  - name: create ansible tomcat directory
+    file:
+      path: /usr/share/tomcat/webapps/ROOT
+      state: directory
+
+  - name: copy static index.html to tomcat webapps/ansible/index.html
+    template:
+      src: index.html.j2
+      dest: /usr/share/tomcat/webapps/ROOT/index.html
+      mode: 0644
+
+  - name: start tomcat
+    service:
+      name: tomcat
+      state: started
+
+  - name: install apache
+    yum:
+      name: httpd
+      state: latest
+  - name: enable apache at boot
+    service:
+      name: httpd
+      enabled: yes
+  - name: start apache
+    service:
+      name: httpd
+      state: started
+  # adding firewall rule(s) & restarts firewalld
+  - name: adding port 8080/tcp & restart firewalld
+    firewalld:
+      port: 8080/tcp
+      permanent: true
+      state: enabled
+  - name: restart firewalld for apptier
+    service:
+    name: firewalld
+    state: restarted

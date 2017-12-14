@@ -1,0 +1,31 @@
+---
+
+#- name: http
+#  package:
+#    name: httpie
+#    state: latest
+- name: install HAProxy
+  yum:
+    name=haproxy state=latest
+- name: enable HAProxy
+  service:
+    name: haproxy
+    state: started
+- name: configure HAProxy
+  template:
+    src: ./haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+- name: restart HAproxy
+  service:
+    name: haproxy
+    state: restarted
+  # adding firewall rule(s) & restart firewalld
+- name: adding port 80/tcp & restart firewalld
+  firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+- name: restart firewalld for webtier
+  service:
+    name: firewalld
+    state: restarted

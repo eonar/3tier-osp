@@ -1,0 +1,25 @@
+---
+
+- name: enable repos
+  template:
+    src: ./open_three-tier-app.repo
+    dest: /etc/yum.repos.d/open_three-tier-app.repo
+    mode: 0644
+
+- name: install firewalld
+  yum:
+    name=firewalld state=latest
+- name: enable firewalld 
+  service:
+    name: firewalld 
+    state: started
+#- name: configure firewalld
+- firewalld:
+    service: ssh
+    #port: 22/tcp
+    permanent: true
+    state: enabled
+- name: restart firewalld
+  service:
+    name: firewalld
+    state: restarted

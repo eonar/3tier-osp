@@ -1,0 +1,15 @@
+- hosts: jumpbox
+  gather_facts: false
+  vars:
+    frontendserver_name: frontend1
+    databaseserver_name: db1
+    flavor_name: m2.tiny
+    frontendserver_group: frontends
+    database_group: databaseservers
+    deployment: dev
+  tasks:
+  - name: Destroy a frontend server instance
+    os_server:
+      cloud: ospcloud
+      name: "{{ frontendserver_name }}"
+      state: absent
