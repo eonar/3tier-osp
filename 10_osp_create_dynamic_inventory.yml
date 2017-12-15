@@ -1,5 +1,7 @@
-- name: creating dynamic inventory
+- name: build the dynamic inventory
   hosts: jumpbox
+  gather_facts: false
+
   tasks:
     - name: Fetch Instance Info
       tags: dynamic_inventory
