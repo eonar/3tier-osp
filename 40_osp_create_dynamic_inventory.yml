@@ -1,4 +1,6 @@
-tasks:
+- name: creating dynamic inventory
+  hosts: jumpbox
+  tasks:
     - name: Fetch Instance Info
       tags: dynamic_inventory
       os_server_facts:
